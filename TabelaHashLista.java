@@ -121,37 +121,14 @@ public class TabelaHashLista {
         }
         System.out.println("======================================\n");
     }
-
-    // 6. Teste da Tabela Hash (Método Main)
-    public static void main(String[] args) {
-        // Criamos uma tabela pequena (tamanho 4) para forçar colisões propositalmente
-        TabelaHashLista minhaTabela = new TabelaHashLista(4);
-
-        System.out.println("Inserindo dados...");
-        
-        minhaTabela.inserir("Ana", "Engenheira");
-        
-        minhaTabela.inserir("Carlos", "Professor");
-        
-        minhaTabela.inserir("Beatriz", "Designer");
-        minhaTabela.inserir("Daniel", "Desenvolvedor");
-        minhaTabela.inserir("Eduarda", "Médica"); 
-        minhaTabela.inserir("Walisson", "Professor");
-        minhaTabela.inserir("Pedro Paulo", "Médico");
-
-        // Mostra a estrutura com as colisões resolvidas por setas (->)
-        minhaTabela.imprimirTabela();
-
-        // Testando a busca
-        System.out.println("Buscando 'Beatriz': " + minhaTabela.buscar("Beatriz"));
-        System.out.println("Buscando 'Eduarda': " + minhaTabela.buscar("Eduarda"));
-        System.out.println("Buscando 'Inexistente': " + minhaTabela.buscar("Lucas"));
-
-        // Testando a remoção
-        System.out.println("\nRemovendo 'Carlos'...");
-        minhaTabela.remover("Carlos");
-
-        // Mostra a tabela após a remoção
-        minhaTabela.imprimirTabela();
-    }
+    
+    //Metodo da multiplicação ( h(k) = ⌊ m * ( (k * A) % 1 ) ⌋ )
+    private int hashMultiplicacao(String chave) {
+        int k = Math.abs(chave.hashCode());
+        double a = 0.6180339887; 
+        double multiplicacao = k * a;
+        double aposVirgula = multiplicacao % 1; 
+        int indice = (int) (aposVirgula * capacidade); 
+    return indice;
+}
 }
