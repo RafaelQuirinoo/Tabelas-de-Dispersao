@@ -131,4 +131,15 @@ public class TabelaHashLista {
         int indice = (int) (aposVirgula * capacidade); 
     return indice;
 }
+
+    //Algoritmo DJB2
+    private int algoritmoDJB2(String chave) {
+    long hash = 5381; 
+    for (int i = 0; i < chave.length(); i++) {
+        char letra = chave.charAt(i);
+        hash = (hash * 33) + letra; 
+    }
+    int posicao = (int) (Math.abs(hash) % capacidade);
+        return posicao;
+}
 }
