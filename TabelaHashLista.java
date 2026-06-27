@@ -1,4 +1,9 @@
 package com.mycompany.hashtable;
+    
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class TabelaHashLista {
 
@@ -18,18 +23,23 @@ public class TabelaHashLista {
     // Atributos da Tabela Hash
     private Node[] tabela;
     private int capacidade;
+    protected int colisoes = 0;
+    protected int metodo = 1;
 
     // Construtor
     public TabelaHashLista(int capacidade) {
         this.capacidade = capacidade;
         this.tabela = new Node[capacidade]; // Inicializa o array com posições vazias (null)
     }
-
+    
     // 2. A Função Hash (Função de Dispersão)
-    // Usa o hashCode nativo do Java e aplica o operador resto (%) para caber no array
+    //Redireciona para um dos metodos
     private int funcaoHash(String chave) {
-        int hash = chave.hashCode();
-        return Math.abs(hash) % capacidade;
+        if (this.metodo == 1) {
+            return multiplicacao(chave);
+        } else {
+            return algoritmoDJB2(chave);
+        }
     }
 
     // 3. Operação de Inserção (Put)
@@ -42,7 +52,9 @@ public class TabelaHashLista {
             tabela[indice] = new Node(chave, valor);
             return;
         }
-
+        
+        colisoes++;
+        
         // Caso 2: Há elementos na posição (Colisão!)
         // Vamos percorrer a lista encadeada naquela posição
         while (noAtual != null) {
@@ -100,38 +112,62 @@ public class TabelaHashLista {
         return false; // Chave não encontrada
     }
 
-    // Método auxiliar para exibir a tabela na aula
-    public void imprimirTabela() {
-        System.out.println("\n=== ESTRUTURA ATUAL DA TABELA HASH ===");
-        for (int i = 0; i < capacidade; i++) {
-            System.out.print("Posição [" + i + "]: ");
-            Node noAtual = tabela[i];
-            if (noAtual == null) {
-                System.out.print("NULL");
-            } else {
-                while (noAtual != null) {
-                    System.out.print("{" + noAtual.chave + " => " + noAtual.valor + "}");
-                    if (noAtual.proximo != null) {
-                        System.out.print(" -> ");
+    public static void carregarDicionario(TabelaHashLista minhaTabela) {
+        try {
+        BufferedReader br = new BufferedReader(new FileReader("english Dictionary.csv"));
+
+        // Pula o cabeçalho ("word,pos,definition")
+        br.readLine(); 
+
+        
+        String linha = br.readLine(); 
+
+        while (linha != null) {
+            boolean entreAspas = false;
+            StringBuilder valorAtual = new StringBuilder();
+            ArrayList<String> colunas = new ArrayList<>();
+
+            // Algoritmo de Varredura
+            for (int i = 0; i < linha.length(); i++) {
+                char letra = linha.charAt(i);            
+                if (letra == '"') {
+                    entreAspas = !entreAspas; 
+                } else if (letra == ',') {
+                    if (entreAspas) {
+                        valorAtual.append(letra); // Vírgula de dentro do texto
+                    } else {
+                        colunas.add(valorAtual.toString());
+                        valorAtual.setLength(0); 
                     }
-                    noAtual = noAtual.proximo;
+                } else {
+                    valorAtual.append(letra);
                 }
             }
-            System.out.println();
-        }
-        System.out.println("======================================\n");
+            colunas.add(valorAtual.toString());
+            if (colunas.size() >= 3) {
+                String palavra = colunas.get(0);
+                String definicao = colunas.get(2);
+                minhaTabela.inserir(palavra, definicao);
+            }
+            linha = br.readLine();
+        } 
+        br.close();
+        System.out.println("Dicionário carregado.");
+    } catch (IOException e) {
+        System.out.println("Erro ao ler o arquivo: " + e.getMessage());
     }
-    
-    //Metodo da multiplicação ( h(k) = ⌊ m * ( (k * A) % 1 ) ⌋ )
-    private int hashMultiplicacao(String chave) {
-        int k = Math.abs(chave.hashCode());
-        double a = 0.6180339887; 
-        double multiplicacao = k * a;
-        double aposVirgula = multiplicacao % 1; 
-        int indice = (int) (aposVirgula * capacidade); 
-    return indice;
 }
-
+    
+     //Metodo da multiplicação ( h(k) = ⌊ m * ( (k * A) % 1 ) ⌋ )
+    private int multiplicacao(String chave) {
+        int k = Math.abs(chave.hashCode());
+        double A = 0.6180339887; 
+        double multiplicacao = k * A;
+        double parteFracionaria = multiplicacao % 1; 
+        int posicao = (int) (parteFracionaria * capacidade); 
+    return posicao;
+}
+    
     //Algoritmo DJB2
     private int algoritmoDJB2(String chave) {
     long hash = 5381; 
@@ -140,6 +176,6 @@ public class TabelaHashLista {
         hash = (hash * 33) + letra; 
     }
     int posicao = (int) (Math.abs(hash) % capacidade);
-        return posicao;
+    return posicao;
 }
 }
