@@ -152,7 +152,7 @@ public class TabelaHashLista {
             linha = br.readLine();
         } 
         br.close();
-        System.out.println("Dicionário carregado.");
+        System.out.println("Dicionario carregado.");
     } catch (IOException e) {
         System.out.println("Erro ao ler o arquivo: " + e.getMessage());
     }
@@ -178,4 +178,24 @@ public class TabelaHashLista {
     int posicao = (int) (Math.abs(hash) % capacidade);
     return posicao;
 }
+    
+    //Metodo de distribuição de chaves
+    public void distribuicao() {
+        int[] contagem = new int[20]; 
+        for (int i=0; i<capacidade; i++) {
+            int tamLista = 0;
+            Node atual = tabela[i];
+            while (atual != null) {
+                tamLista++;
+                atual = atual.proximo;
+            }
+            if (tamLista < 20) {
+                contagem[tamLista]++;
+            }
+        }
+        System.out.println("CHAVES POR POSICAO | NUMERO DE POSICOES");
+        for (int i=0; i<= 8; i++) {
+            System.out.println(i + " elementos        | " + contagem[i]);
+        }
+    }
 }
