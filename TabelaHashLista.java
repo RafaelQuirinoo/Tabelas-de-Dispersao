@@ -23,6 +23,8 @@ public class TabelaHashLista {
     // Atributos da Tabela Hash
     private Node[] tabela;
     private int capacidade;
+    private int tamanho = 0;
+    public boolean usarRehash = false;
     protected int colisoes = 0;
     protected int metodo = 1;
 
@@ -30,6 +32,14 @@ public class TabelaHashLista {
     public TabelaHashLista(int capacidade) {
         this.capacidade = capacidade;
         this.tabela = new Node[capacidade]; // Inicializa o array com posições vazias (null)
+    }
+
+    public int getTamanho() {
+        return tamanho;
+    }
+
+    public int getCapacidade() {
+        return capacidade;
     }
     
     // 2. A Função Hash (Função de Dispersão)
@@ -44,12 +54,17 @@ public class TabelaHashLista {
 
     // 3. Operação de Inserção (Put)
     public void inserir(String chave, String valor) {
+        if (usarRehash && (double) tamanho / capacidade >= 0.75) {
+            redimensionar();
+        }
+
         int indice = funcaoHash(chave);
         Node noAtual = tabela[indice];
 
         // Caso 1: A posição está vazia (Sem colisão)
         if (noAtual == null) {
             tabela[indice] = new Node(chave, valor);
+            tamanho++;
             return;
         }
         
@@ -72,6 +87,7 @@ public class TabelaHashLista {
 
         // Insere o novo nó no final da lista encadeada existente
         noAtual.proximo = new Node(chave, valor);
+        tamanho++;
     }
 
     // 4. Operação de Busca (Get)
@@ -104,6 +120,7 @@ public class TabelaHashLista {
                     // Se estiver no meio ou fim, "pula" o nó atual
                     noAnterior.proximo = noAtual.proximo;
                 }
+                tamanho--;
                 return true; // Removido com sucesso
             }
             noAnterior = noAtual;
@@ -197,5 +214,38 @@ public class TabelaHashLista {
         for (int i=0; i<= 8; i++) {
             System.out.println(i + " elementos        | " + contagem[i]);
         }
+    }
+
+    private void redimensionar() {
+        int novaCapacidade = capacidade * 2;
+        Node[] tabelaAntiga = tabela;
+        tabela = new Node[novaCapacidade];
+        capacidade = novaCapacidade;
+        tamanho = 0;
+
+        for (int i = 0; i < tabelaAntiga.length; i++) {
+            Node noAtual = tabelaAntiga[i];
+            while (noAtual != null) {
+                inserirSemRehash(noAtual.chave, noAtual.valor);
+                noAtual = noAtual.proximo;
+            }
+        }
+    }
+
+    private void inserirSemRehash(String chave, String valor) {
+        int indice = funcaoHash(chave);
+        Node noAtual = tabela[indice];
+
+        if (noAtual == null) {
+            tabela[indice] = new Node(chave, valor);
+            tamanho++;
+            return;
+        }
+
+        while (noAtual.proximo != null) {
+            noAtual = noAtual.proximo;
+        }
+        noAtual.proximo = new Node(chave, valor);
+        tamanho++;
     }
 }
